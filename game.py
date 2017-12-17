@@ -29,9 +29,9 @@ body = [[100,100], [90,100], [80,100]]
 food = [random.randrange(1,72)*10,random.randrange(1,48)*10]
 foodspawn = True
 
-direction = 'right'
+direction = 'RIGHT'
 changeto = direction
-
+score = 0
 #function-> game over
 def gameover():
     myFont = pygame.font.SysFont('AR Blanca',56)
@@ -40,7 +40,95 @@ def gameover():
     GOrect.midtop = (360,20)
     surface.blit(GOsurf,GOrect)
     pygame.display.flip()
+    showscore(0)
+    time.sleep(5)
+    pygame.quit()
+    sys.exit()
     
-gameover()
-time.sleep(3)    
+def showscore(choice=1):
+    sFont = pygame.font.SysFont('AR Blanca',24)
+    ssurf = sFont.render('Score : {0}'.format(score), True, black)
+    srect = ssurf.get_rect()
+    if choice == 1:
+                         srect.midtop = (80,100)
+    else:
+                         srect.midtop = (360,120)
+    surface.blit(ssurf,srect)
+    pygame.display.flip()                     
+#main logic
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT or event.key == ord('d'):
+                changeto = 'RIGHT'
+            if event.key == pygame.K_LEFT or event.key == ord('a'):
+                changeto = 'LEFT'
+            if event.key == pygame.K_UP or event.key == ord('w'):
+                changeto = 'UP'
+            if event.key == pygame.K_DOWN or event.key == ord('s'):
+                changeto = 'DOWN'
+            if event.key == pygame.K_ESCAPE:
+                pygame.event.post(pygame.event.Event(pygame.QUIT))
+                
+                
+    if changeto == 'RIGHT' and not direction == 'LEFT':
+        direction ='RIGHT'
+    if changeto == 'LEFT' and not direction == 'RIGHT':
+        direction ='LEFT'
+    if changeto == 'UP' and not direction == 'DOWN':
+        direction ='UP'
+    if changeto == 'DOWN' and not direction == 'UP':
+        direction ='DOWN'
+        
+    #snake position   
+    if direction == 'RIGHT':
+        head[0] += 10
+    if direction == 'LEFT':
+        head[0] -= 10
+    if direction == 'DOWN':
+        head[1] += 10
+    if direction == 'UP':
+        head[1] -= 10
+        
+    #body
+    body.insert(0,list(head))
+    if head[0] == food[0] and head[1] == food[1]:
+        score +=1
+        foodspawn = False
+    else:
+        body.pop()
+        
+    if foodspawn == False:
+        food = [random.randrange(1,72)*10,random.randrange(1,48)*10]
+    foodspawn = True
+    
+    surface.fill(white)
+    for pos in body:
+        pygame.draw.rect(surface, blue, pygame.Rect(pos[0],pos[1],10,10))
+        
+    pygame.draw.rect(surface, orange, pygame.Rect(food[0],food[1],10,10))
+        
+    #bound
+    if head[0] > 710 or head[0] < 0:
+        gameover()
+    if head[1] > 470 or head[1] < 0:
+        gameover()
+        
+    for block in body[1:]:
+        if head[0] == block[0] and head[1] == block[1]:
+            gameover()
+    
+    pygame.display.flip()
+    showscore()                     
+    fps.tick(11)
+
+    
+    
+    
+    
+    
+    
     
